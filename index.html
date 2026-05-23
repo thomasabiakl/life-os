@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thomas ABI AKL — Life OS</title>
+<script src="https://accounts.google.com/gsi/client" async></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0c12;
+  --surface: #13131c;
+  --surface2: #1a1a26;
+  --surface3: #202030;
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.13);
+  --text: #e4e2f0;
+  --text-sec: #9896aa;
+  --muted: #5a5870;
+  --gold: #c9a84c;
+  --gold-dim: rgba(201,168,76,0.1);
+  --gold-border: rgba(201,168,76,0.25);
+  --blue: #4c8ec9;
+  --blue-dim: rgba(76,142,201,0.1);
+  --blue-border: rgba(76,142,201,0.25);
+  --teal: #4cb8a0;
+  --teal-dim: rgba(76,184,160,0.1);
+  --teal-border: rgba(76,184,160,0.25);
+  --amber: #c97c4c;
+  --amber-dim: rgba(201,124,76,0.1);
+  --amber-border: rgba(201,124,76,0.25);
+  --rose: #c94c72;
+  --rose-dim: rgba(201,76,114,0.1);
+  --green-dim: rgba(76,184,120,0.1);
+  --green: #4cb878;
+  --green-border: rgba(76,184,120,0.25);
+  --serif: 'DM Serif Display', Georgia, serif;
+  --sans: 'Instrument Sans', system-ui, sans-serif;
+  --mono: 'DM Mono', 'Courier New', monospace;
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── Grain overlay ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
+
+.app {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 36px 24px 80px;
+}
+
+/* ── Setup banner ── */
+.setup-banner {
+  background: var(--gold-dim);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 18px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  animation: fadeUp 0.4s ease both;
+}
+.setup-banner p { font-size: 12px; color: var(--gold); }
+.setup-banner a { color: var(--gold); font-weight: 500; }
+.setup-banner.hidden { display: none; }
+
+/* ── Header ── */
+header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+  animation: fadeUp 0.5s ease both;
+}
+.header-left .eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--gold);
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.live-dot {
+  width: 6px; height: 6px;
+  background: var(--teal);
+  border-radius: 50%;
+  animation: pulse 2.5s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+header h1 {
+  font-family: var(--serif);
+  font-size: 34px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+header h1 em { font-style: italic; color: var(--gold); }
+
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+#clock {
+  font-family: var(--mono);
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+#dateline {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+#auth-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border-hover);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-sec);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#auth-btn:hover { background: var(--surface3); color: var(--text); }
+#auth-btn.connected { color: var(--teal); border-color: var(--teal-border); background: var(--teal-dim); }
+#user-avatar { width: 20px; height: 20px; border-radius: 50%; display: none; }
+
+/* ── Cards ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: border-color 0.2s;
+}
+.card:hover { border-color: var(--border-hover); }
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.card-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.dot-gold { background: var(--gold); }
+.dot-blue { background: var(--blue); }
+.dot-teal { background: var(--teal); }
+.dot-amber { background: var(--amber); }
+.dot-rose { background: var(--rose); }
+.dot-green { background: var(--green); }
+.dot-muted { background: var(--muted); }
+
+.card-action {
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.2s;
+  background: none;
+  border: none;
+  padding: 0;
+}
+.card-action:hover { color: var(--text); }
+
+/* ── Grid layouts ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.grid-12 { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; }
+.row { margin-bottom: 12px; }
+
+/* ── Countdown strip ── */
+.countdown-strip {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+  animation: fadeUp 0.5s ease 0.08s both;
+}
+.cdown {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.cdown:hover { border-color: var(--border-hover); }
+.cdown::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+.cdown-bar::before { background: var(--gold); }
+.cdown-llm::before { background: var(--blue); }
+.cdown-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+.cdown-title { font-size: 13px; font-weight: 500; }
+.progress-track {
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+  margin-top: 10px;
+  width: 160px;
+  overflow: hidden;
+}
+.progress-fill { height: 100%; border-radius: 1px; background: var(--gold); }
+.cdown-llm .progress-fill { background: var(--blue); }
+.progress-note {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.cdown-number {
+  font-family: var(--serif);
+  font-size: 48px;
+  line-height: 1;
+  color: var(--gold);
+  text-align: right;
+}
+.cdown-llm .cdown-number { color: var(--blue); }
+.cdown-unit {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  text-align: right;
+  margin-top: 2px;
+}
+
+/* ── Calendar events ── */
+.event-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: flex-start;
+}
+.event-item:last-child { border-bottom: none; padding-bottom: 0; }
+.event-item:first-child { padding-top: 0; }
+.event-date-block {
+  text-align: center;
+  min-width: 36px;
+}
+.event-day {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--blue);
+  line-height: 1;
+}
+.event-month {
+  font-family: var(--mono);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.event-title { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.event-time { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.event-location { font-size: 10px; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+
+/* ── Gmail ── */
+.email-item {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.email-item:hover { opacity: 0.75; }
+.email-item:last-child { border-bottom: none; padding-bottom: 0; }
+.email-item:first-child { padding-top: 0; }
+.email-from { font-size: 11px; font-weight: 600; color: var(--text); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.email-subject { font-size: 11px; color: var(--text-sec); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+.email-snippet { font-size: 10px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.email-unread .email-from { color: var(--blue); }
+.email-unread .email-subject { color: var(--text); }
+.email-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+.email-time { font-family: var(--mono); font-size: 9px; color: var(--muted); }
+
+/* ── Connect prompt ── */
+.connect-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 0;
+  gap: 10px;
+  color: var(--muted);
+}
+.connect-prompt p { font-size: 12px; text-align: center; }
+.connect-btn {
+  background: var(--blue-dim);
+  border: 1px solid var(--blue-border);
+  border-radius: 20px;
+  padding: 7px 16px;
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--blue);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.connect-btn:hover { background: rgba(76,142,201,0.18); }
+
+/* ── Applications ── */
+.app-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+}
+.app-item:first-child { padding-top: 0; }
+.app-item:last-child { border-bottom: none; padding-bottom: 0; }
+.app-firm { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.app-role { font-size: 11px; color: var(--text-sec); }
+.app-location { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-top: 2px; }
+.app-note { font-size: 10px; color: var(--muted); font-style: italic; margin-top: 2px; }
+.pill {
+  font-family: var(--mono);
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.pill-sent { background: rgba(88,88,112,0.2); color: var(--muted); border: 1px solid var(--border); }
+.pill-interview { background: var(--gold-dim); color: var(--gold); border: 1px solid var(--gold-border); }
+.pill-second { background: rgba(201,168,76,0.2); color: var(--gold); border: 1px solid rgba(201,168,76,0.5); font-weight: 600; }
+.pill-pending { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue-border); }
+.pill-offer { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); }
+.pill-rejected { background: rgba(180,60,60,0.1); color: #c06060; border: 1px solid rgba(180,60,60,0.2); }
+
+/* ── Add form ── */
+.add-form { display: none; flex-direction: column; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+.add-form.open { display: flex; }
+.f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.f-input, .f-select {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+.f-input::placeholder { color: var(--muted); }
+.f-input:focus, .f-select:focus { border-color: var(--border-hover); }
+.f-select option { background: var(--surface2); }
+.f-btn {
+  background: var(--gold-dim);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius-sm);
+  padding: 7px 14px;
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background 0.2s;
+}
+.f-btn:hover { background: rgba(201,168,76,0.18); }
+
+/* ── Bar topics ── */
+.topic-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+}
+.topic-row:last-child { border-bottom: none; padding-bottom: 0; }
+.topic-row:first-child { padding-top: 0; }
+.topic-name { font-size: 11px; color: var(--text); flex: 1; }
+.topic-priority { font-family: var(--mono); font-size: 8px; color: var(--gold); opacity: 0.7; }
+.topic-bar { width: 70px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+.topic-fill { height: 100%; border-radius: 2px; background: var(--gold); }
+.topic-pct { font-family: var(--mono); font-size: 9px; color: var(--muted); width: 24px; text-align: right; flex-shrink: 0; }
+.topic-input { width: 44px; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; font-family: var(--mono); font-size: 9px; color: var(--text); text-align: center; }
+
+/* ── Church ── */
+.session-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+.session-row:first-child { padding-top: 0; }
+.session-row:last-child { border-bottom: none; padding-bottom: 0; }
+.session-month {
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 3px 8px;
+  border-radius: 6px;
+  min-width: 40px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.session-month.done { background: var(--amber-dim); color: var(--amber); }
+.session-month.upcoming { background: var(--surface2); color: var(--muted); }
+.session-topic { font-size: 12px; font-weight: 500; color: var(--text); flex: 1; }
+.session-topic.empty { color: var(--muted); font-style: italic; }
+.session-status { font-size: 10px; color: var(--muted); }
+.session-status.ready { color: var(--teal); }
+.generate-btn {
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px dashed var(--amber-border);
+  background: var(--amber-dim);
+  color: var(--amber);
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.generate-btn:hover { background: rgba(201,124,76,0.18); }
+
+/* ── Students ── */
+.student-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.student-row:first-child { padding-top: 0; }
+.student-row:last-child { border-bottom: none; padding-bottom: 0; }
+.student-name { font-size: 12px; font-weight: 500; }
+.student-detail { font-size: 10px; color: var(--muted); margin-top: 1px; }
+.student-income { font-family: var(--mono); font-size: 11px; color: var(--teal); }
+.income-total {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.income-total-label { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+.income-total-amount { font-family: var(--mono); font-size: 16px; color: var(--teal); }
+
+/* ── Finances ── */
+.bank-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: border-color 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.bank-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.bank-us::before { background: linear-gradient(90deg, #1a6aba, #2580d0); }
+.bank-revolut::before { background: linear-gradient(90deg, #4c4cc9, #7c4cc9); }
+.bank-fr::before { background: linear-gradient(90deg, #2e7d3a, #4cba68); }
+.bank-name { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 4px; }
+.bank-label { font-size: 11px; color: var(--text-sec); margin-bottom: 12px; }
+.bank-balance-wrap { display: flex; align-items: baseline; gap: 4px; }
+.bank-currency { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.bank-balance {
+  font-family: var(--serif);
+  font-size: 28px;
+  line-height: 1;
+  color: var(--text);
+  border: none;
+  background: transparent;
+  width: 100%;
+  outline: none;
+  cursor: text;
+}
+.bank-balance:focus { color: var(--gold); }
+.bank-updated { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-top: 6px; opacity: 0.6; }
+.bank-connect-note { font-size: 10px; color: var(--muted); margin-top: 8px; opacity: 0.6; font-style: italic; }
+
+/* ── Notes ── */
+.notes-textarea {
+  width: 100%;
+  min-height: 80px;
+  background: transparent;
+  border: none;
+  resize: none;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  line-height: 1.7;
+}
+.notes-textarea::placeholder { color: var(--muted); opacity: 0.5; }
+
+/* ── Loading / empty ── */
+.loading { font-family: var(--mono); font-size: 10px; color: var(--muted); padding: 16px 0; text-align: center; }
+.empty-state { font-size: 11px; color: var(--muted); padding: 10px 0; font-style: italic; }
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.row:nth-child(1) { animation: fadeUp 0.5s ease 0.1s both; }
+.row:nth-child(2) { animation: fadeUp 0.5s ease 0.18s both; }
+.row:nth-child(3) { animation: fadeUp 0.5s ease 0.26s both; }
+.row:nth-child(4) { animation: fadeUp 0.5s ease 0.34s both; }
+.row:nth-child(5) { animation: fadeUp 0.5s ease 0.42s both; }
+.row:nth-child(6) { animation: fadeUp 0.5s ease 0.50s both; }
+
+/* ── Refresh spinner ── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinning { animation: spin 1s linear infinite; display: inline-block; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .grid-2, .grid-3, .grid-12, .countdown-strip { grid-template-columns: 1fr; }
+  header { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .header-right { align-items: flex-start; }
+  #clock { font-size: 18px; }
+  .cdown-number { font-size: 36px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Setup banner -->
+  <div class="setup-banner" id="setup-banner">
+    <p>⚠️ Google not connected. Open <strong>SETUP.md</strong> and follow Step 4 to get your Client ID, then paste it at the top of this file.</p>
+    <button class="card-action" onclick="document.getElementById('setup-banner').classList.add('hidden')">dismiss</button>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <div class="header-left">
+      <div class="eyebrow"><span class="live-dot"></span>Life OS — Active</div>
+      <h1>Thomas <em>ABI AKL</em></h1>
+    </div>
+    <div class="header-right">
+      <button id="auth-btn" onclick="handleAuthClick()">
+        <img id="user-avatar" src="" alt="">
+        <span id="auth-label">Connect Google</span>
+      </button>
+      <div id="clock">--:--:--</div>
+      <div id="dateline">Cleveland, OH</div>
+    </div>
+  </header>
+
+  <!-- Countdown strip -->
+  <div class="countdown-strip row">
+    <div class="cdown cdown-bar">
+      <div>
+        <div class="cdown-label">Primary mission</div>
+        <div class="cdown-title">NY Bar Examination</div>
+        <div class="progress-track"><div class="progress-fill" id="bar-prog"></div></div>
+        <div class="progress-note" id="bar-prog-label"></div>
+      </div>
+      <div>
+        <div class="cdown-number" id="bar-days">—</div>
+        <div class="cdown-unit">days remaining</div>
+      </div>
+    </div>
+    <div class="cdown cdown-llm">
+      <div>
+        <div class="cdown-label">Academic</div>
+        <div class="cdown-title">LL.M. — Case Western Reserve</div>
+        <div class="progress-track"><div class="progress-fill" id="llm-prog"></div></div>
+        <div class="progress-note" id="llm-prog-label"></div>
+      </div>
+      <div>
+        <div class="cdown-number" id="llm-days">—</div>
+        <div class="cdown-unit">days remaining</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendar + Gmail -->
+  <div class="grid-2 row">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-label"><span class="dot dot-blue"></span>Upcoming — next 7 days</div>
+        <button class="card-action" onclick="refreshCalendar()">↻ refresh</button>
+      </div>
+      <div id="calendar-content"><div class="connect-prompt"><p>Connect Google to see your calendar</p><button class="connect-btn" onclick="handleAuthClick()">Connect Google</button></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-label"><span class="dot dot-rose"></span>Inbox — unread</div>
+        <button class="card-action" onclick="refreshGmail()">↻ refresh</button>
+      </div>
+      <div id="gmail-content"><div class="connect-prompt"><p>Connect Google to see your inbox</p><button class="connect-btn" onclick="handleAuthClick()">Connect Google</button></div></div>
+    </div>
+  </div>
+
+  <!-- Applications -->
+  <div class="card row">
+    <div class="card-header">
+      <div class="card-label"><span class="dot dot-gold"></span>Job applications tracker</div>
+      <button class="card-action" onclick="toggleAddForm()">+ add</button>
+    </div>
+    <div id="apps-list"></div>
+    <div class="add-form" id="add-form">
+      <input class="f-input" id="f-firm" placeholder="Firm / organization name">
+      <input class="f-input" id="f-role" placeholder="Role / practice area">
+      <div class="f-row">
+        <input class="f-input" id="f-location" placeholder="City, Country">
+        <select class="f-select" id="f-status">
+          <option value="sent">Sent</option>
+          <option value="interview">1st Interview</option>
+          <option value="second">2nd Interview</option>
+          <option value="pending">Pending reply</option>
+          <option value="offer">Offer received</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+      <input class="f-input" id="f-note" placeholder="Note (optional)">
+      <button class="f-btn" onclick="saveApplication()">Save application</button>
+    </div>
+  </div>
+
+  <!-- Bar Prep + Church + Students -->
+  <div class="grid-3 row">
+
+    <!-- Bar prep -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-label"><span class="dot dot-gold"></span>Bar study progress</div>
+        <button class="card-action" onclick="toggleBarEdit()">edit</button>
+      </div>
+      <div id="bar-topics"></div>
+    </div>
+
+    <!-- Church -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-label"><span class="dot dot-amber"></span>Church — Amchit</div>
+        <button class="card-action" onclick="addChurchSession()">+ add</button>
+      </div>
+      <div id="church-sessions"></div>
+      <button class="generate-btn" onclick="openGenerator()">✦ Generate بطاقة اجتماع</button>
+    </div>
+
+    <!-- Arabic students -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-label"><span class="dot dot-teal"></span>Arabic students</div>
+        <button class="card-action" onclick="addStudent()">+ add</button>
+      </div>
+      <div id="students-list"></div>
+      <div class="income-total">
+        <div class="income-total-label">Monthly est.</div>
+        <div class="income-total-amount" id="income-total">$0</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Finances -->
+  <div class="grid-3 row">
+    <div class="bank-card bank-us">
+      <div class="bank-name">Chase Bank · USA</div>
+      <div class="bank-label">Checking account</div>
+      <div class="bank-balance-wrap">
+        <span class="bank-currency">$</span>
+        <input class="bank-balance" id="bal-chase" type="number" placeholder="0.00" oninput="saveBalance('chase', this.value)" onfocus="this.select()">
+      </div>
+      <div class="bank-updated" id="chase-updated"></div>
+      <div class="bank-connect-note">Click amount to update · Live sync via Plaid coming soon</div>
+    </div>
+    <div class="bank-card bank-revolut">
+      <div class="bank-name">Revolut · Multi-currency</div>
+      <div class="bank-label">Digital account</div>
+      <div class="bank-balance-wrap">
+        <span class="bank-currency">€</span>
+        <input class="bank-balance" id="bal-revolut" type="number" placeholder="0.00" oninput="saveBalance('revolut', this.value)" onfocus="this.select()">
+      </div>
+      <div class="bank-updated" id="revolut-updated"></div>
+      <div class="bank-connect-note">Click amount to update · Live sync coming soon</div>
+    </div>
+    <div class="bank-card bank-fr">
+      <div class="bank-name">Crédit Agricole · France</div>
+      <div class="bank-label">Compte courant</div>
+      <div class="bank-balance-wrap">
+        <span class="bank-currency">€</span>
+        <input class="bank-balance" id="bal-ca" type="number" placeholder="0.00" oninput="saveBalance('ca', this.value)" onfocus="this.select()">
+      </div>
+      <div class="bank-updated" id="ca-updated"></div>
+      <div class="bank-connect-note">Click amount to update · Live sync via Tink coming soon</div>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="card row">
+    <div class="card-header">
+      <div class="card-label"><span class="dot dot-muted"></span>Quick capture</div>
+      <button class="card-action" id="notes-saved-label">auto-saving</button>
+    </div>
+    <textarea class="notes-textarea" id="quick-note" placeholder="Capture a thought, task, or reminder... (auto-saves)"></textarea>
+  </div>
+
+</div><!-- /app -->
+
+<!-- بطاقة Generator Modal -->
+<div id="generator-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:none;align-items:center;justify-content:center;padding:24px">
+  <div style="background:var(--surface);border:1px solid var(--border-hover);border-radius:var(--radius);padding:28px;max-width:480px;width:100%;max-height:80vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--amber)">Generate بطاقة اجتماع</div>
+      <button class="card-action" onclick="closeGenerator()">✕ close</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+      <input class="f-input" id="gen-topic" placeholder="Topic (e.g. Saint Paul, the Beatitudes...)">
+      <input class="f-input" id="gen-month" placeholder="Session month (e.g. July 2026)">
+      <textarea class="f-input" id="gen-notes" placeholder="Any specific angles or themes to cover (optional)" style="min-height:70px;resize:none"></textarea>
+    </div>
+    <button class="f-btn" style="background:var(--amber-dim);border-color:var(--amber-border);color:var(--amber)" onclick="generateBattaqa()">Generate in Arabic</button>
+    <div id="gen-output" style="margin-top:16px;display:none">
+      <div style="font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:8px">Generated — copy and paste into your document:</div>
+      <div id="gen-text" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-size:12px;line-height:1.8;direction:rtl;text-align:right;white-space:pre-wrap;max-height:300px;overflow-y:auto"></div>
+      <button class="f-btn" style="margin-top:10px" onclick="copyGenerated()">Copy to clipboard</button>
+    </div>
+    <div id="gen-loading" style="display:none;text-align:center;padding:20px;font-family:var(--mono);font-size:10px;color:var(--muted)">Generating in Arabic...</div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// CONFIG — Replace with your Google Client ID
+// Get it from: console.cloud.google.com
+// ════════════════════════════════════════
+const GOOGLE_CLIENT_ID = 'REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID';
+
+// ── State ─────────────────────────────────────────────────────────
+let accessToken = null;
+let tokenExpiresAt = 0;
+let tokenClient = null;
+let googleUser = null;
+
+// ── Dates ─────────────────────────────────────────────────────────
+const BAR_DATE  = new Date('2027-02-23T08:00:00');
+const LLM_DATE  = new Date('2027-01-15T08:00:00');
+const BAR_START = new Date('2025-08-01');
+const LLM_START = new Date('2025-08-15');
+
+// ── Initial data ──────────────────────────────────────────────────
+const DEFAULT_APPS = [
+  { id: 1, firm: 'Alem & Associates', role: 'Corporate, Banking & Finance Intern', location: 'Abu Dhabi, UAE', status: 'second', note: '2nd round Mon 25 May — Christine Abou Assali, Head of Corporate' },
+];
+
+const DEFAULT_TOPICS = [
+  { name: 'Business Associations', pct: 35, priority: true },
+  { name: 'Securities Regulation', pct: 30, priority: true },
+  { name: 'Contracts',             pct: 20, priority: false },
+  { name: 'Civil Procedure',       pct: 15, priority: false },
+  { name: 'Constitutional Law',    pct: 10, priority: false },
+  { name: 'Torts',                 pct: 8,  priority: false },
+  { name: 'Real Property',         pct: 5,  priority: false },
+  { name: 'Evidence',              pct: 0,  priority: false },
+  { name: 'Criminal Law',          pct: 0,  priority: false },
+  { name: 'NY Practice',           pct: 0,  priority: false },
+  { name: 'Trusts & Estates',      pct: 0,  priority: false },
+  { name: 'Family Law',            pct: 0,  priority: false },
+];
+
+const DEFAULT_CHURCH = [
+  { month: 'June', topic: 'يوحنا المعمدان', status: 'ready' },
+  { month: 'July', topic: '',               status: 'pending' },
+  { month: 'August', topic: '',             status: 'pending' },
+  { month: 'September', topic: '',          status: 'pending' },
+];
+
+const DEFAULT_STUDENTS = [
+  { name: 'Student A', lang: 'Arabic', rate: 30, sessions: 4 },
+  { name: 'Student B', lang: 'Arabic', rate: 30, sessions: 4 },
+];
+
+// ── Storage helpers ───────────────────────────────────────────────
+const get = (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch { return def; } };
+const set = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+let apps     = get('thomas_apps',     DEFAULT_APPS);
+let topics   = get('thomas_topics',   DEFAULT_TOPICS);
+let church   = get('thomas_church',   DEFAULT_CHURCH);
+let students = get('thomas_students', DEFAULT_STUDENTS);
+let balances = get('thomas_balances', { chase: '', revolut: '', ca: '' });
+let balDates = get('thomas_bal_dates', {});
+let barEditMode = false;
+
+// ── Clock ─────────────────────────────────────────────────────────
+function tick() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  document.getElementById('clock').textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('dateline').textContent = `${days[now.getDay()]} ${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()} · Cleveland OH`;
+}
+
+// ── Countdown ─────────────────────────────────────────────────────
+function updateCountdown() {
+  function daysUntil(d) { return Math.max(0, Math.ceil((d - Date.now()) / 86400000)); }
+  function pct(start, end) { return Math.min(100, Math.max(0, ((Date.now() - start) / (end - start)) * 100)); }
+
+  document.getElementById('bar-days').textContent = daysUntil(BAR_DATE);
+  document.getElementById('llm-days').textContent = daysUntil(LLM_DATE);
+
+  const bp = pct(BAR_START, BAR_DATE);
+  document.getElementById('bar-prog').style.width = bp + '%';
+  document.getElementById('bar-prog-label').textContent = Math.round(bp) + '% of study window elapsed';
+
+  const lp = pct(LLM_START, LLM_DATE);
+  document.getElementById('llm-prog').style.width = lp + '%';
+  document.getElementById('llm-prog-label').textContent = Math.round(lp) + '% of program elapsed';
+}
+
+// ── Google Auth ───────────────────────────────────────────────────
+function isPlaceholderClientId() {
+  return GOOGLE_CLIENT_ID === 'REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID' || !GOOGLE_CLIENT_ID;
+}
+
+function initGoogle() {
+  if (isPlaceholderClientId()) return;
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: [
+      'https://www.googleapis.com/auth/gmail.readonly',
+      'https://www.googleapis.com/auth/calendar.readonly',
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/userinfo.email',
+    ].join(' '),
+    callback: async (resp) => {
+      if (resp.error) { console.error(resp); return; }
+      accessToken = resp.access_token;
+      tokenExpiresAt = Date.now() + (resp.expires_in * 1000);
+      await loadUserProfile();
+      loadCalendar();
+      loadGmail();
+    }
+  });
+}
+
+window.onGoogleLibraryLoad = initGoogle;
+
+function handleAuthClick() {
+  if (isPlaceholderClientId()) {
+    alert('Please follow the setup guide to connect Google:\n\n1. Open SETUP.md\n2. Follow Step 4 to get your Client ID\n3. Replace REPLACE_WITH_YOUR_GOOGLE_CLIENT_ID in index.html');
+    return;
+  }
+  if (!tokenClient) { initGoogle(); }
+  tokenClient.requestAccessToken({ prompt: accessToken ? '' : 'consent' });
+}
+
+async function loadUserProfile() {
+  try {
+    const r = await gfetch('https://www.googleapis.com/oauth2/v2/userinfo');
+    if (!r) return;
+    googleUser = r;
+    const btn = document.getElementById('auth-btn');
+    const av = document.getElementById('user-avatar');
+    const lbl = document.getElementById('auth-label');
+    if (r.picture) { av.src = r.picture; av.style.display = 'block'; }
+    lbl.textContent = r.given_name || 'Connected';
+    btn.classList.add('connected');
+    document.getElementById('setup-banner').classList.add('hidden');
+  } catch(e) {}
+}
+
+async function gfetch(url) {
+  if (!accessToken) return null;
+  if (Date.now() > tokenExpiresAt - 30000) { accessToken = null; updateAuthUI(false); return null; }
+  const r = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  if (r.status === 401) { accessToken = null; return null; }
+  return r.json();
+}
+
+// ── Calendar ──────────────────────────────────────────────────────
+async function loadCalendar() {
+  const el = document.getElementById('calendar-content');
+  if (!accessToken) { el.innerHTML = connectPrompt('calendar'); return; }
+  el.innerHTML = '<div class="loading">Loading calendar...</div>';
+  try {
+    const now = new Date().toISOString();
+    const week = new Date(Date.now() + 7 * 86400000).toISOString();
+    const data = await gfetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${encodeURIComponent(now)}&timeMax=${encodeURIComponent(week)}&orderBy=startTime&singleEvents=true&maxResults=8`);
+    if (!data || !data.items || !data.items.length) {
+      el.innerHTML = '<div class="empty-state">No events in the next 7 days.</div>'; return;
+    }
+    el.innerHTML = data.items.map(ev => {
+      const start = ev.start.dateTime ? new Date(ev.start.dateTime) : new Date(ev.start.date);
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const timeStr = ev.start.dateTime ? start.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'All day';
+      return `<div class="event-item">
+        <div class="event-date-block">
+          <div class="event-day">${start.getDate()}</div>
+          <div class="event-month">${months[start.getMonth()]}</div>
+        </div>
+        <div>
+          <div class="event-title">${ev.summary || '(no title)'}</div>
+          <div class="event-time">${timeStr}</div>
+          ${ev.location ? `<div class="event-location">📍 ${ev.location}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = '<div class="empty-state">Could not load calendar.</div>'; }
+}
+
+async function refreshCalendar() { await loadCalendar(); }
+
+// ── Gmail ─────────────────────────────────────────────────────────
+async function loadGmail() {
+  const el = document.getElementById('gmail-content');
+  if (!accessToken) { el.innerHTML = connectPrompt('inbox'); return; }
+  el.innerHTML = '<div class="loading">Loading inbox...</div>';
+  try {
+    const list = await gfetch('https://www.googleapis.com/gmail/v1/users/me/messages?labelIds=INBOX,UNREAD&maxResults=6');
+    if (!list || !list.messages || !list.messages.length) {
+      el.innerHTML = '<div class="empty-state">Inbox is clear ✓</div>'; return;
+    }
+    const msgs = await Promise.all(list.messages.slice(0,5).map(m =>
+      gfetch(`https://www.googleapis.com/gmail/v1/users/me/messages/${m.id}?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date`)
+    ));
+    el.innerHTML = msgs.filter(Boolean).map(m => {
+      const h = m.payload?.headers || [];
+      const get = name => h.find(x => x.name === name)?.value || '';
+      const from = get('From').replace(/<.*>/, '').replace(/"/g, '').trim() || get('From');
+      const subject = get('Subject') || '(no subject)';
+      const date = get('Date');
+      const isUnread = (m.labelIds || []).includes('UNREAD');
+      const dateStr = date ? new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+      return `<div class="email-item ${isUnread ? 'email-unread' : ''}">
+        <div class="email-meta"><div class="email-from">${from}</div><div class="email-time">${dateStr}</div></div>
+        <div class="email-subject">${subject}</div>
+        <div class="email-snippet">${m.snippet || ''}</div>
+      </div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = '<div class="empty-state">Could not load inbox.</div>'; }
+}
+
+async function refreshGmail() { await loadGmail(); }
+
+function connectPrompt(what) {
+  return `<div class="connect-prompt"><p>Connect Google to see your ${what}</p><button class="connect-btn" onclick="handleAuthClick()">Connect Google</button></div>`;
+}
+
+// ── Applications ──────────────────────────────────────────────────
+const statusMap = {
+  sent:     ['Sent',          'pill-sent'],
+  interview:['1st Interview', 'pill-interview'],
+  second:   ['2nd Interview', 'pill-second'],
+  pending:  ['Awaiting reply','pill-pending'],
+  offer:    ['Offer ✓',       'pill-offer'],
+  rejected: ['Rejected',      'pill-rejected'],
+};
+
+function renderApps() {
+  const el = document.getElementById('apps-list');
+  if (!apps.length) { el.innerHTML = '<div class="empty-state">No applications tracked yet.</div>'; return; }
+  el.innerHTML = apps.map((a, i) => {
+    const [label, cls] = statusMap[a.status] || ['Unknown', 'pill-sent'];
+    return `<div class="app-item">
+      <div style="flex:1;min-width:0">
+        <div class="app-firm">${a.firm}</div>
+        <div class="app-role">${a.role}</div>
+        <div class="app-location">${a.location}</div>
+        ${a.note ? `<div class="app-note">${a.note}</div>` : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <span class="pill ${cls}">${label}</span>
+        <button class="card-action" onclick="removeApp(${i})" title="Remove">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleAddForm() {
+  document.getElementById('add-form').classList.toggle('open');
+}
+
+function saveApplication() {
+  const firm = document.getElementById('f-firm').value.trim();
+  if (!firm) return;
+  apps.push({
+    id: Date.now(),
+    firm,
+    role: document.getElementById('f-role').value.trim(),
+    location: document.getElementById('f-location').value.trim(),
+    status: document.getElementById('f-status').value,
+    note: document.getElementById('f-note').value.trim(),
+  });
+  set('thomas_apps', apps);
+  renderApps();
+  ['f-firm','f-role','f-location','f-note'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('add-form').classList.remove('open');
+}
+
+function removeApp(i) {
+  if (!confirm('Remove this application?')) return;
+  apps.splice(i, 1);
+  set('thomas_apps', apps);
+  renderApps();
+}
+
+// ── Bar Topics ────────────────────────────────────────────────────
+function renderTopics() {
+  document.getElementById('bar-topics').innerHTML = topics.map((t, i) => {
+    if (barEditMode) {
+      return `<div class="topic-row">
+        <div class="topic-name">${t.name}${t.priority ? ' <span style="color:var(--gold);font-size:9px">★</span>' : ''}</div>
+        <div class="topic-bar"><div class="topic-fill" style="width:${t.pct}%"></div></div>
+        <input class="topic-input" type="number" min="0" max="100" value="${t.pct}" onchange="updateTopic(${i}, this.value)">
+      </div>`;
+    }
+    return `<div class="topic-row">
+      <div class="topic-name">${t.name}${t.priority ? ' <span style="color:var(--gold);font-size:9px">★</span>' : ''}</div>
+      <div class="topic-bar"><div class="topic-fill" style="width:${t.pct}%"></div></div>
+      <div class="topic-pct">${t.pct}%</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleBarEdit() {
+  barEditMode = !barEditMode;
+  document.querySelector('[onclick="toggleBarEdit()"]').textContent = barEditMode ? 'done' : 'edit';
+  if (!barEditMode) set('thomas_topics', topics);
+  renderTopics();
+}
+
+function updateTopic(i, val) {
+  topics[i].pct = Math.min(100, Math.max(0, parseInt(val) || 0));
+  renderTopics();
+}
+
+// ── Church ────────────────────────────────────────────────────────
+function renderChurch() {
+  document.getElementById('church-sessions').innerHTML = church.map((s, i) => `
+    <div class="session-row">
+      <div class="session-month ${s.status === 'ready' ? 'done' : 'upcoming'}">${s.month.slice(0,3)}</div>
+      <div class="session-topic ${s.topic ? '' : 'empty'}">${s.topic || 'Topic TBD'}</div>
+      <div class="session-status ${s.status === 'ready' ? 'ready' : ''}">${s.status === 'ready' ? 'Ready ✓' : 'Not started'}</div>
+    </div>
+  `).join('');
+}
+
+function addChurchSession() {
+  const month = prompt('Month (e.g. October 2026):');
+  if (!month) return;
+  const topic = prompt('Topic (in Arabic or English):') || '';
+  church.push({ month, topic, status: topic ? 'pending' : 'pending' });
+  set('thomas_church', church);
+  renderChurch();
+}
+
+// ── بطاقة Generator ───────────────────────────────────────────────
+function openGenerator() {
+  document.getElementById('generator-modal').style.display = 'flex';
+}
+function closeGenerator() {
+  document.getElementById('generator-modal').style.display = 'none';
+}
+
+async function generateBattaqa() {
+  const topic = document.getElementById('gen-topic').value.trim();
+  const month = document.getElementById('gen-month').value.trim();
+  const notes = document.getElementById('gen-notes').value.trim();
+  if (!topic) { alert('Please enter a topic'); return; }
+
+  document.getElementById('gen-output').style.display = 'none';
+  document.getElementById('gen-loading').style.display = 'block';
+
+  try {
+    const prompt = `أنت مساعد لإعداد بطاقات اجتماع لمجموعة الشباب في كنيسة فرع مار يوحنا المعمدان - عمشيت، لبنان. 
+البرنامج السنوي بعنوان "Year Glowup" ويستهدف الشباب من 19 إلى 30 عامًا.
+
+اكتب بطاقة اجتماع كاملة باللغة العربية للموضوع التالي: "${topic}"
+${month ? `شهر الاجتماع: ${month}` : ''}
+${notes ? `ملاحظات إضافية: ${notes}` : ''}
+
+اتبع هذا الهيكل بدقة:
+1. عنوان البطاقة (موضوع: اسم الشخصية أو الموضوع — عبارة رئيسية قوية)
+2. الإشكالية (فقرة تربط الموضوع بتحديات الشباب المعاصر)
+3. الأهداف (3 أهداف، كل هدف يحتوي على عنوان + نقطتين رئيسيتين مع bold للكلمات المحورية + تطبيق عملي في حياة اليوم)
+
+أجب باللغة العربية فقط، بدون أي مقدمة أو تعليق بالإنجليزية.`;
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content?.[0]?.text || 'حدث خطأ. يرجى المحاولة مجددًا.';
+    document.getElementById('gen-text').textContent = text;
+    document.getElementById('gen-output').style.display = 'block';
+  } catch(e) {
+    document.getElementById('gen-text').textContent = 'حدث خطأ في الاتصال. يرجى المحاولة مجددًا.';
+    document.getElementById('gen-output').style.display = 'block';
+  }
+  document.getElementById('gen-loading').style.display = 'none';
+}
+
+function copyGenerated() {
+  const text = document.getElementById('gen-text').textContent;
+  navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
+}
+
+// ── Students ──────────────────────────────────────────────────────
+function renderStudents() {
+  const el = document.getElementById('students-list');
+  if (!students.length) { el.innerHTML = '<div class="empty-state">No students yet.</div>'; }
+  else {
+    el.innerHTML = students.map((s, i) => `
+      <div class="student-row">
+        <div>
+          <div class="student-name">${s.name}</div>
+          <div class="student-detail">${s.lang} · ${s.sessions} sessions/month</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="student-income">$${s.rate * s.sessions}/mo</div>
+          <button class="card-action" onclick="removeStudent(${i})">✕</button>
+        </div>
+      </div>
+    `).join('');
+  }
+  const total = students.reduce((sum, s) => sum + s.rate * s.sessions, 0);
+  document.getElementById('income-total').textContent = `$${total}/mo`;
+}
+
+function addStudent() {
+  const name = prompt('Student name (or alias for privacy):');
+  if (!name) return;
+  const rate = parseInt(prompt('Rate per session ($):') || '0');
+  const sessions = parseInt(prompt('Sessions per month:') || '4');
+  students.push({ name, lang: 'Arabic', rate, sessions });
+  set('thomas_students', students);
+  renderStudents();
+}
+
+function removeStudent(i) {
+  if (!confirm('Remove this student?')) return;
+  students.splice(i, 1);
+  set('thomas_students', students);
+  renderStudents();
+}
+
+// ── Balances ──────────────────────────────────────────────────────
+function saveBalance(bank, val) {
+  balances[bank] = val;
+  balDates[bank] = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  set('thomas_balances', balances);
+  set('thomas_bal_dates', balDates);
+  const mapId = { chase: 'chase-updated', revolut: 'revolut-updated', ca: 'ca-updated' };
+  const el = document.getElementById(mapId[bank]);
+  if (el) el.textContent = 'Updated ' + balDates[bank];
+}
+
+function loadBalances() {
+  if (balances.chase)   { document.getElementById('bal-chase').value   = balances.chase;   }
+  if (balances.revolut) { document.getElementById('bal-revolut').value = balances.revolut; }
+  if (balances.ca)      { document.getElementById('bal-ca').value      = balances.ca;      }
+  const mapId = { chase: 'chase-updated', revolut: 'revolut-updated', ca: 'ca-updated' };
+  Object.entries(balDates).forEach(([k, v]) => {
+    const el = document.getElementById(mapId[k]);
+    if (el && v) el.textContent = 'Updated ' + v;
+  });
+}
+
+// ── Notes ─────────────────────────────────────────────────────────
+let noteSaveTimer;
+function initNotes() {
+  document.getElementById('quick-note').value = localStorage.getItem('thomas_note') || '';
+  document.getElementById('quick-note').addEventListener('input', () => {
+    clearTimeout(noteSaveTimer);
+    noteSaveTimer = setTimeout(() => {
+      localStorage.setItem('thomas_note', document.getElementById('quick-note').value);
+      document.getElementById('notes-saved-label').textContent = 'saved ✓';
+      setTimeout(() => document.getElementById('notes-saved-label').textContent = 'auto-saving', 1500);
+    }, 600);
+  });
+}
+
+// ── Setup banner ──────────────────────────────────────────────────
+function checkSetup() {
+  if (!isPlaceholderClientId()) {
+    document.getElementById('setup-banner').classList.add('hidden');
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  checkSetup();
+  tick();
+  setInterval(tick, 1000);
+  updateCountdown();
+  renderApps();
+  renderTopics();
+  renderChurch();
+  renderStudents();
+  loadBalances();
+  initNotes();
+  if (typeof google !== 'undefined') initGoogle();
+});
+</script>
+</body>
+</html>
